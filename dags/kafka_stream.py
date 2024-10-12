@@ -5,6 +5,7 @@ import logging
 import requests
 import json
 from typing import Optional, Any, Dict
+from kafka import KafkaProducer
 
 default_args = {
     'owner': 'airscholar',
@@ -72,6 +73,11 @@ def stream_data() -> Optional[dict[str, Any]]:
     res = get_data()
     formatted_res = format_data(res)
     logging.info(formatted_res) 
+
+    producer = KafkaProducer(bootstrap_servers=['localhost:9092'],max_block_ms=5000)
+    producer.send('users_created', json.dumps(formatted_res).encode('utf-8'))
+    
+
     return formatted_res
 
 # Define the Airflow DAG
